@@ -2,7 +2,6 @@ package entity
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/gofrs/uuid/v5"
 	"regexp"
 )
 
@@ -16,20 +15,19 @@ const (
 
 type Toy struct {
 	BaseEntity
-	CategoryID        uuid.UUID `gorm:"type:uuid;not null" json:"category_id"`
-	Name              string    `gorm:"size:255;not null" json:"name"`
-	Description       string    `gorm:"type:text" json:"description"`
-	AgeRecommendation string    `gorm:"size:50" json:"age_recommendation"`
-	Condition         string    `gorm:"size:50;not null;check:condition IN ('new', 'excellent', 'good', 'fair', 'poor')" json:"condition"`
-	RentalPrice       float64   `gorm:"type:decimal(10,2);not null" json:"rental_price"`
-	LateFeePerDay     float64   `gorm:"type:decimal(10,2);not null" json:"late_fee_per_day"`
-	ReplacementPrice  float64   `gorm:"type:decimal(10,2);not null" json:"replacement_price"`
-	IsAvailable       bool      `gorm:"default:true" json:"is_available"`
-	Stock             int       `gorm:"not null" json:"stock"`
+	Name              string  `gorm:"size:255;not null" json:"name"`
+	Description       string  `gorm:"type:text" json:"description"`
+	AgeRecommendation string  `gorm:"size:50" json:"age_recommendation"`
+	Condition         string  `gorm:"size:50;not null;check:condition IN ('new', 'excellent', 'good', 'fair', 'poor')" json:"condition"`
+	RentalPrice       float64 `gorm:"type:decimal(10,2);not null" json:"rental_price"`
+	LateFeePerDay     float64 `gorm:"type:decimal(10,2);not null" json:"late_fee_per_day"`
+	ReplacementPrice  float64 `gorm:"type:decimal(10,2);not null" json:"replacement_price"`
+	IsAvailable       bool    `gorm:"default:true" json:"is_available"`
+	Stock             int     `gorm:"not null" json:"stock"`
 
-	Category    Category     `gorm:"foreignKey:CategoryID" json:"category"`
-	Images      []ToyImage   `gorm:"foreignKey:ToyID" json:"images"`
-	RentalItems []RentalItem `gorm:"foreignKey:ToyID" json:"-"`
+	Category    []ToyCategory `gorm:"many2many:toy_categories" json:"categories"`
+	Images      []ToyImage    `gorm:"foreignKey:ToyID" json:"images"`
+	RentalItems []RentalItem  `gorm:"foreignKey:ToyID" json:"-"`
 }
 
 func (*Toy) TableName() string {
@@ -38,7 +36,7 @@ func (*Toy) TableName() string {
 
 func (t *Toy) Validate() []string {
 	err := validation.ValidateStruct(t,
-		validation.Field(&t.CategoryID,
+		validation.Field(&t.Category,
 			validation.Required.Error("Kategori wajib diisi"),
 			validation.NotNil.Error("Kategori tidak boleh kosong"),
 		),

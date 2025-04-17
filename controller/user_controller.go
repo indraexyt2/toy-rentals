@@ -130,7 +130,7 @@ func (uc *UserController) Insert(c *gin.Context) {
 
 	if err := user.Validate(true); err != nil {
 		log.Error("Failed to validate user: ", err)
-		response.ResponseError(c, http.StatusBadRequest, "Failed to validate user")
+		response.ResponseError(c, http.StatusBadRequest, err)
 		return
 	}
 

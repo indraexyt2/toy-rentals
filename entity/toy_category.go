@@ -2,19 +2,19 @@ package entity
 
 import validation "github.com/go-ozzo/ozzo-validation/v4"
 
-type Category struct {
+type ToyCategory struct {
 	BaseEntity
 	Name        string `gorm:"size:100;not null" json:"name"`
 	Description string `gorm:"type:text" json:"description"`
 
-	Toys []Toy `gorm:"foreignKey:CategoryID" json:"-"`
+	Toys []Toy `gorm:"many2many:toy_categories" json:"-"`
 }
 
-func (*Category) TableName() string {
+func (*ToyCategory) TableName() string {
 	return "categories"
 }
 
-func (c *Category) Validate() []string {
+func (c *ToyCategory) Validate() []string {
 	err := validation.ValidateStruct(c,
 		validation.Field(&c.Name,
 			validation.Required.Error("Nama kategori wajib diisi"),

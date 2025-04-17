@@ -38,7 +38,7 @@ func NewDatabase(config *Config) *Database {
 func (db *Database) AutoMigrate() error {
 	return db.DB.AutoMigrate(
 		&entity.User{},
-		&entity.Category{},
+		&entity.ToyCategory{},
 		&entity.Toy{},
 		&entity.ToyImage{},
 		&entity.Rental{},
