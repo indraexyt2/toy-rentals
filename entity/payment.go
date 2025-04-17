@@ -28,7 +28,6 @@ const (
 type Payment struct {
 	BaseEntity
 	RentalID          uuid.UUID  `gorm:"type:uuid;not null" json:"rental_id"`
-	OrderID           string     `gorm:"size:100;not null;uniqueIndex" json:"order_id"`
 	TransactionID     string     `gorm:"size:100;uniqueIndex" json:"transaction_id"`
 	PaymentType       string     `gorm:"size:50;not null;check:payment_type IN ('rental', 'late_fee', 'damage_fee', 'combined')" json:"payment_type"`
 	GrossAmount       float64    `gorm:"type:decimal(10,2);not null" json:"gross_amount"`

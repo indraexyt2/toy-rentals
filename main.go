@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"final-project/config"
+	_ "final-project/docs"
 	"final-project/utils/helpers"
 	"net/http"
 	"os"
@@ -10,6 +11,18 @@ import (
 	"syscall"
 )
 
+// @title           ToyRental API
+// @version         1.0
+// @description     REST API for toy rental service
+
+// @contact.name   Indrawansyah
+// @contact.email  indra@dev.com
+
+// @host      localhost:8080
+// @BasePath  /api
+// @securityDefinitions.cookie ApiCookieAuth
+// @in cookie
+// @name access_tokend
 func main() {
 	// Load konfigurasi
 	cfg := config.LoadConfig()
@@ -27,7 +40,7 @@ func main() {
 	}
 
 	// Setup routes
-	r := setupRoutes(cfg, db)
+	r := setupRoutes(cfg, db.DB)
 	srv := &http.Server{
 		Addr:    ":" + cfg.ServerPort,
 		Handler: r,

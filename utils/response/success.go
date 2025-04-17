@@ -2,15 +2,15 @@ package response
 
 import "github.com/gin-gonic/gin"
 
-type responseSuccess struct {
+type APISuccessResponse struct {
 	Status   int         `json:"status_code,omitempty"`
-	Data     interface{} `json:"data,omitempty"`
-	Metadata interface{} `json:"metadata,omitempty"`
 	Message  string      `json:"message,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	Data     interface{} `json:"data,omitempty"`
 }
 
 func ResponseSuccess(c *gin.Context, statusCode int, data, metadata interface{}, message string) {
-	var newResponse = &responseSuccess{
+	var newResponse = &APISuccessResponse{
 		Status:   1,
 		Data:     data,
 		Metadata: metadata,

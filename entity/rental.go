@@ -71,11 +71,6 @@ func (r *Rental) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-func (r *Rental) AfterFind(tx *gorm.DB) error {
-	r.TotalAmount = r.TotalRentalPrice + r.LateFee + r.DamageFee
-	return nil
-}
-
 func (r *Rental) Validate() []string {
 	validateExpectedReturnDate := func(value interface{}) error {
 		date, _ := value.(time.Time)

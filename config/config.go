@@ -17,6 +17,12 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	DBPort     string
+
+	// JWT
+	JWTSecret       string
+	AccessTokenExp  int
+	RefreshTokenExp int
+	Issuer          string
 }
 
 func LoadConfig() *Config {
@@ -34,6 +40,12 @@ func LoadConfig() *Config {
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
 		DBName:     getEnv("DB_NAME", "toyrentals"),
 		DBPort:     getEnv("DB_PORT", "5432"),
+
+		// JWT
+		JWTSecret:       getEnv("JWT_SECRET", "secret"),
+		AccessTokenExp:  getEnvAsInt("ACCESS_TOKEN_EXP", 1),
+		RefreshTokenExp: getEnvAsInt("REFRESH_TOKEN_EXP", 7),
+		Issuer:          getEnv("ISSUER", "toyrentals"),
 	}
 
 }
@@ -49,6 +61,14 @@ func getEnv(key, defaultValue string) string {
 func getEnvAsBool(key string, defaultValue bool) bool {
 	valueStr := os.Getenv(key)
 	if value, err := strconv.ParseBool(valueStr); err == nil {
+		return value
+	}
+	return defaultValue
+}
+
+func getEnvAsInt(key string, defaultValue int) int {
+	valueStr := os.Getenv(key)
+	if value, err := strconv.Atoi(valueStr); err == nil {
 		return value
 	}
 	return defaultValue

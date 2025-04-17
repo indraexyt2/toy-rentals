@@ -13,7 +13,6 @@ type UserToken struct {
 	RefreshToken          string    `gorm:"type:text;not null" json:"refresh_token"`
 	AccessTokenExpiresAt  time.Time `gorm:"not null" json:"access_token_expires_at"`
 	RefreshTokenExpiresAt time.Time `gorm:"not null" json:"refresh_token_expires_at"`
-	IPAddress             string    `gorm:"size:45" json:"ip_address"`
 	IsBlocked             bool      `gorm:"default:false" json:"is_blocked"`
 
 	User User `gorm:"foreignKey:UserID" json:"-"`
