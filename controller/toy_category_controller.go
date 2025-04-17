@@ -155,13 +155,13 @@ func (tc *ToyCategoryController) UpdateById(c *gin.Context) {
 	var reqBody entity.ToyCategory
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		logger.Error("Failed to bind JSON: ", err)
-		response.ResponseError(c, http.StatusBadRequest, "Failed to bind JSON")
+		response.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := reqBody.Validate(); err != nil {
 		logger.Error("Failed to validate toy category: ", err)
-		response.ResponseError(c, http.StatusBadRequest, "Failed to validate toy category")
+		response.ResponseError(c, http.StatusBadRequest, err)
 		return
 	}
 
