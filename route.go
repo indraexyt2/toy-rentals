@@ -38,6 +38,11 @@ func setupRoutes(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	toyCategorySvc := service.NewToyCategoryService(toyCategoryRepo)
 	toyCategoryController := controller.NewToyCategoryController(toyCategorySvc)
 
+	// Toy
+	toyRepo := repository.NewToyRepository(db)
+	toySvc := service.NewToyService(toyRepo)
+	toyController := controller.NewToyController(toySvc)
+
 	// Middleware
 	authMiddleware := middleware.NewAuthMiddleware(*jwtHelper, userTokenSvc)
 
@@ -56,6 +61,13 @@ func setupRoutes(cfg *config.Config, db *gorm.DB) *gin.Engine {
 		{
 			toyCategory.GET("/category", toyCategoryController.FindAll)
 			toyCategory.GET("/category/:id", toyCategoryController.FinById)
+		}
+
+		// Toy routes
+		toy := public.Group("/toy")
+		{
+			toy.GET("", toyController.FindAll)
+			toy.GET("/:id", toyController.FinById)
 		}
 	}
 
@@ -89,6 +101,14 @@ func setupRoutes(cfg *config.Config, db *gorm.DB) *gin.Engine {
 			toyCategory.POST("/category", toyCategoryController.Insert)
 			toyCategory.PUT("/category/:id", toyCategoryController.UpdateById)
 			toyCategory.DELETE("/category/:id", toyCategoryController.DeleteById)
+		}
+
+		// Admin toy routes
+		toy := admin.Group("/toy")
+		{
+			toy.POST("", toyController.Insert)
+			toy.PUT("/:id", toyController.UpdateById)
+			toy.DELETE("/:id", toyController.DeleteById)
 		}
 	}
 

@@ -25,7 +25,7 @@ type Toy struct {
 	IsAvailable       bool    `gorm:"default:true" json:"is_available"`
 	Stock             int     `gorm:"not null" json:"stock"`
 
-	Category    []ToyCategory `gorm:"many2many:toy_categories" json:"categories"`
+	Categories  []ToyCategory `gorm:"many2many:toy_categories" json:"categories"`
 	Images      []ToyImage    `gorm:"foreignKey:ToyID" json:"images"`
 	RentalItems []RentalItem  `gorm:"foreignKey:ToyID" json:"-"`
 }
@@ -36,7 +36,7 @@ func (*Toy) TableName() string {
 
 func (t *Toy) Validate() []string {
 	err := validation.ValidateStruct(t,
-		validation.Field(&t.Category,
+		validation.Field(&t.Categories,
 			validation.Required.Error("Kategori wajib diisi"),
 			validation.NotNil.Error("Kategori tidak boleh kosong"),
 		),

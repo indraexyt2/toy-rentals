@@ -105,7 +105,7 @@ func (tc *ToyCategoryController) FinById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param toy_category body entity.ToyCategory true "Toy Category"
-// @Success 200 {object} helpers.Response
+// @Success 200 {object} response.APISuccessResponse
 // @Router /toy/category [post]
 func (tc *ToyCategoryController) Insert(c *gin.Context) {
 	var logger = helpers.Logger
@@ -140,7 +140,7 @@ func (tc *ToyCategoryController) Insert(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Toy Category ID"
 // @Param toy_category body entity.ToyCategory true "Toy Category"
-// @Success 200 {object} helpers.Response
+// @Success 200 {object} response.APISuccessResponse
 // @Router /toy/category/{id} [put]
 func (tc *ToyCategoryController) UpdateById(c *gin.Context) {
 	var logger = helpers.Logger
@@ -185,7 +185,7 @@ func (tc *ToyCategoryController) UpdateById(c *gin.Context) {
 // @Description Delete toy category by id
 // @Tags Toy Category
 // @Param id path string true "Toy Category ID"
-// @Success 200 {object} helpers.Response
+// @Success 200 {object} response.APISuccessResponse
 // @Router /toy/category/{id} [delete]
 func (tc *ToyCategoryController) DeleteById(c *gin.Context) {
 	var logger = helpers.Logger
