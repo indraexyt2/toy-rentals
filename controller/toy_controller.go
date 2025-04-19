@@ -2,18 +2,13 @@ package controller
 
 import (
 	"errors"
-	"final-project/entity"
 	"final-project/service"
 	"final-project/utils/helpers"
 	"final-project/utils/response"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	uuid2 "github.com/gofrs/uuid/v5"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"net/http"
-	"path/filepath"
-	"strconv"
 )
 
 type IToyController interface {
@@ -123,110 +118,7 @@ func (t ToyController) FinById(c *gin.Context) {
 // @Success 200 {object} entity.Toy
 // @Router /toy [post]
 func (t ToyController) Insert(c *gin.Context) {
-	var logger = helpers.Logger
 
-	toy := entity.Toy{
-		Name:              c.PostForm("name"),
-		Description:       c.PostForm("description"),
-		AgeRecommendation: c.PostForm("age_recommendation"),
-		Condition:         c.PostForm("condition"),
-		Stock:             0,
-	}
-
-	rentalPrice, err := strconv.ParseFloat(c.PostForm("rental_price"), 64)
-	if err == nil {
-		toy.RentalPrice = rentalPrice
-	}
-
-	lateFeePerDay, err := strconv.ParseFloat(c.PostForm("late_fee_per_day"), 64)
-	if err == nil {
-		toy.LateFeePerDay = lateFeePerDay
-	}
-
-	replacementPrice, err := strconv.ParseFloat(c.PostForm("replacement_price"), 64)
-	if err == nil {
-		toy.ReplacementPrice = replacementPrice
-	}
-
-	stock, err := strconv.Atoi(c.PostForm("stock"))
-	if err == nil {
-		toy.Stock = stock
-	}
-
-	isAvailable, err := strconv.ParseBool(c.PostForm("is_available"))
-	if err == nil {
-		toy.IsAvailable = isAvailable
-	} else {
-		toy.IsAvailable = true
-	}
-
-	if categoryIDs, ok := c.Request.PostForm["categories"]; ok {
-		for _, categoryID := range categoryIDs {
-			categoryIDUUID, err := uuid.Parse(categoryID)
-			if err != nil {
-				logger.Error("Invalid UUID format for category: ", err)
-				continue
-			}
-			toy.Categories = append(toy.Categories, entity.ToyCategory{
-				BaseEntity: entity.BaseEntity{
-					ID: uuid2.UUID(categoryIDUUID),
-				},
-			})
-		}
-	}
-
-	if err := toy.Validate(); err != nil {
-		logger.Error("Failed to validate toy: ", err)
-		response.ResponseError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	form, err := c.MultipartForm()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Gagal parsing form"})
-		return
-	}
-
-	images := form.File["images"]
-	if len(images) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Setidaknya satu gambar diperlukan"})
-		return
-	}
-
-	isPrimaryStr := c.PostForm("is_primary_index")
-	primaryIndex, err := strconv.Atoi(isPrimaryStr)
-	if err != nil || primaryIndex < 0 || primaryIndex >= len(images) {
-		primaryIndex = 0
-	}
-
-	var toyImages []entity.ToyImage
-	for i, image := range images {
-		id, _ := uuid.NewV7()
-		extension := filepath.Ext(image.Filename)
-		filename := fmt.Sprintf("%s%s", id, extension)
-		savePath := filepath.Join("uploads", filename)
-
-		if err := c.SaveUploadedFile(image, savePath); err != nil {
-			logger.Error("Failed to save image: ", err)
-			continue
-		}
-
-		toyImages = append(toyImages, entity.ToyImage{
-			ImageURL:  "/uploads/" + filename,
-			IsPrimary: i == primaryIndex,
-		})
-	}
-
-	toy.Images = toyImages
-
-	err = t.toySvc.Insert(c.Request.Context(), &toy)
-	if err != nil {
-		logger.Error("Failed to insert toy: ", err)
-		response.ResponseError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.ResponseSuccess(c, http.StatusOK, toy, nil, "Success insert toy")
 }
 
 // UpdateById godoc
@@ -250,64 +142,6 @@ func (t ToyController) Insert(c *gin.Context) {
 // @Success 200 {object} entity.Toy "Updated Toy"
 // @Router /toy/{id} [put]
 func (t ToyController) UpdateById(c *gin.Context) {
-	var logger = helpers.Logger
-	id := c.Param("id")
-
-	// Cek apakah ID valid
-	if id == "" {
-		response.ResponseError(c, http.StatusBadRequest, "ID tidak valid")
-		return
-	}
-
-	// Ambil data mainan yang ada berdasarkan ID
-	existingToy, err := t.toySvc.FindById(c.Request.Context(), id)
-	if err != nil {
-		logger.Error("Failed to find toy: ", err)
-		response.ResponseError(c, http.StatusNotFound, "Mainan tidak ditemukan")
-		return
-	}
-
-	// Parsing form data dari request
-	if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
-		response.ResponseError(c, http.StatusBadRequest, "Gagal parsing form")
-		return
-	}
-	postForm := c.Request.PostForm
-	form := c.Request.MultipartForm
-
-	// Build data mainan yang akan di-update
-	toyUpdate, err := t.toySvc.BuildUpdatedToy(existingToy, postForm)
-	if err != nil {
-		logger.Error("Validation or parsing failed: ", err)
-		response.ResponseError(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	// Tangani gambar (hapus gambar yang tidak diinginkan dan tambahkan gambar baru)
-	updatedImages, err := t.toySvc.HandleToyImages(existingToy.Images, form, postForm.Get("deleted_images"), c)
-	if err != nil {
-		logger.Error("Image handling failed: ", err)
-		response.ResponseError(c, http.StatusBadRequest, err.Error())
-		return
-	}
-	toyUpdate.Images = updatedImages
-
-	// Pastikan ada gambar yang tersisa
-	if len(toyUpdate.Images) == 0 {
-		response.ResponseError(c, http.StatusBadRequest, "Setidaknya satu gambar diperlukan")
-		return
-	}
-
-	// Update data mainan di database
-	err = t.toySvc.UpdateById(c.Request.Context(), id, &toyUpdate)
-	if err != nil {
-		logger.Error("Failed to update toy: ", err)
-		response.ResponseError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// Kirimkan response berhasil
-	response.ResponseSuccess(c, http.StatusOK, toyUpdate, nil, "Success update toy")
 }
 
 func (t ToyController) DeleteById(c *gin.Context) {

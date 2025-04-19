@@ -26,7 +26,7 @@ type Toy struct {
 	Stock             int     `gorm:"not null" json:"stock"`
 
 	Categories  []ToyCategory `gorm:"many2many:toy_categories" json:"categories"`
-	Images      []ToyImage    `gorm:"foreignKey:ToyID" json:"images"`
+	Images      []ToyImage    `gorm:"many2many:image_toys" json:"images"`
 	RentalItems []RentalItem  `gorm:"foreignKey:ToyID" json:"-"`
 }
 

@@ -43,6 +43,16 @@ func setupRoutes(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	toySvc := service.NewToyService(toyRepo)
 	toyController := controller.NewToyController(toySvc)
 
+	// Toy Images
+	toyImageRepo := repository.NewToyImageRepository(db)
+	toyImageSvc := service.NewToyImageService(toyImageRepo)
+	toyImageController := controller.NewToyImageController(toyImageSvc)
+
+	// Rental
+	rentalRepo := repository.NewRentalRepository(db)
+	rentalSvc := service.NewRentalService(rentalRepo, userRepo, toyRepo)
+	rentalController := controller.NewRentalController(rentalSvc)
+
 	// Middleware
 	authMiddleware := middleware.NewAuthMiddleware(*jwtHelper, userTokenSvc)
 
@@ -82,6 +92,13 @@ func setupRoutes(cfg *config.Config, db *gorm.DB) *gin.Engine {
 			auth.DELETE("/auth/:id", userController.DeleteById)
 			auth.DELETE("/auth/logout", userController.Logout)
 		}
+
+		// Rental routes
+		rental := protected.Group("/rental")
+		{
+			rental.POST("", rentalController.Insert)
+			rental.PUT("/:id", rentalController.UpdateById)
+		}
 	}
 
 	// Admin routes
@@ -103,12 +120,28 @@ func setupRoutes(cfg *config.Config, db *gorm.DB) *gin.Engine {
 			toyCategory.DELETE("/category/:id", toyCategoryController.DeleteById)
 		}
 
+		// Admin toy images routes
+		toyImage := admin.Group("/toy")
+		{
+			toyImage.POST("/image", toyImageController.Insert)
+			toyImage.PUT("/image/:id", toyImageController.FindAll)
+			toyImage.DELETE("/image/:id", toyImageController.DeleteById)
+		}
+
 		// Admin toy routes
 		toy := admin.Group("/toy")
 		{
 			toy.POST("", toyController.Insert)
 			toy.PUT("/:id", toyController.UpdateById)
 			toy.DELETE("/:id", toyController.DeleteById)
+		}
+
+		// Admin rental routes
+		rental := admin.Group("/rental")
+		{
+			rental.GET("", rentalController.FindAll)
+			rental.GET("/:id", rentalController.FinById)
+			rental.PUT("/:id/return", rentalController.ReturnRental)
 		}
 	}
 
